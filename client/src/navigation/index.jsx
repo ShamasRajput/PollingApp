@@ -5,6 +5,7 @@ import { ROLES } from "../constants";
 import Home from "../pages/Home";
 import Login from "../pages/Login";
 import MainLayout from "../layout";
+import AuthLayout from "../layout/AuthLayout"
 import Dashboard from "../pages/admin";
 
 export default function Navigation() {
@@ -14,6 +15,7 @@ export default function Navigation() {
     const [userRole, setUserRole] = useState(
         localStorage.getItem("role") ?? null
     );
+
     const isAdmin = userRole === ROLES.ADMIN;
 
 
@@ -41,8 +43,8 @@ export default function Navigation() {
     return (
         <Router>
             <Routes>
-                <Route path="/" element={Wrapper(MainLayout, ROLES.CUSTOMER, handleComponent(null, Home))} />
-                <Route path="/login" element={Wrapper(MainLayout, ROLES.CUSTOMER, handleComponent(null, Login))} />
+                <Route path="/" element={Wrapper(MainLayout, null, handleComponent(null, Home))} />
+                <Route path="/login" element={<AuthLayout><Login onLogin={handleLogin} /></AuthLayout>} />
 
                 <Route path="/dashboard" element={Wrapper(MainLayout, ROLES.ADMIN, <Dashboard />)} />
 

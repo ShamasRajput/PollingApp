@@ -1,13 +1,25 @@
 import { Form, Input, Button } from 'antd';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom'
+import { ROLES } from '../constants';
+import { AuthService } from '../services';
 
-export default function LoginForm() {
+export default function LoginForm({ onLogin }) {
 
+  const [loading, setLoading] = useState(false)
   const navigate = useNavigate();
-  const onFinish = (values) => {
-    console.log('Login submitted:', values);
-    navigate('/dashboard');
 
+
+  const onFinish = async (values) => {
+    setLoading(true)
+    const response = await AuthService.loginPost(values)
+    setLoading(false)
+    if (response?.success ?? false) {
+      onLogin();
+      localStorage.setItem('token', response.data.token)
+      localStorage.setItem('role', ROLES.ADMIN)
+      navigate('/dashboard');
+    }
   };
 
   return (
