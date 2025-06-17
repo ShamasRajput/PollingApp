@@ -5,6 +5,7 @@ import { ROLES } from "../constants";
 import Home from "../pages/Home";
 import Login from "../pages/Login";
 import MainLayout from "../layout";
+import Dashboard from "../pages/admin";
 
 export default function Navigation() {
 
@@ -42,6 +43,9 @@ export default function Navigation() {
             <Routes>
                 <Route path="/" element={Wrapper(MainLayout, ROLES.CUSTOMER, handleComponent(null, Home))} />
                 <Route path="/login" element={Wrapper(MainLayout, ROLES.CUSTOMER, handleComponent(null, Login))} />
+
+                <Route path="/dashboard" element={Wrapper(MainLayout, ROLES.ADMIN, <Dashboard />)} />
+
             </Routes>
 
         </Router>

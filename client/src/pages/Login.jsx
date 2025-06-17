@@ -1,9 +1,12 @@
+import LoginForm from '../components/LoginForm';
+import { Card } from 'antd';
+
 export default function Login() {
-    return (
-      <div className="p-4">
-        <h2 className="text-2xl font-bold mb-4">Login Page</h2>
-        <p>This is a placeholder. Add your login form here.</p>
-      </div>
-    );
-  }
-  
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
+      <Card title="Login" className="w-full max-w-md shadow-md">
+        <LoginForm />
+      </Card>
+    </div>
+  );
+}
