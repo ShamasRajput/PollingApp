@@ -11,7 +11,11 @@ const pollSchema = new mongoose.Schema({
     options: [optionSchema],
     image: { type: String },
     user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-    voters: [{ ip: String }],
+    voters: [{
+        ip: String,
+        optionId: { type: mongoose.Schema.Types.ObjectId } 
+
+    }],
 }, { timestamps: true });
 
 module.exports = mongoose.model("Poll", pollSchema);

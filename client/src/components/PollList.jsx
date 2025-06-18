@@ -58,14 +58,39 @@ export default function PollList() {
             )}
 
             <div className="flex-grow space-y-2">
-              {poll.options.map(option => (
+              {poll.options.map(option => {
+                const userVote = poll.voters?.[0]?.optionId; // assuming only one voter per IP
+                const hasVoted = votes[poll._id] || userVote;
+
+                return (
+                  <Button
+                    key={option._id}
+                    onClick={() => handleVote(poll._id, option._id)}
+                    block
+                    style={{
+                      backgroundColor: hasVoted === option._id ? '#bbf7d0' : '#f3f4f6',
+                      borderColor: hasVoted === option._id ? '#86efac' : '#d1d5db',
+                      color: 'black',
+                      textAlign: 'left',
+                      marginBottom: 10,
+                    }}
+                  >
+                    <span className="w-full block text-left">
+                      {option.text} — {option.votes} vote{option.votes !== 1 ? 's' : ''}
+                    </span>
+                  </Button>
+                );
+              })}
+
+              {/* {poll.options.map(option => (
                 <Button
                   key={option._id}
                   onClick={() => handleVote(poll._id, option._id)}
                   block
                   style={{
-                    backgroundColor: votes[poll._id] === option._id ? '#bbf7d0' : '#f3f4f6',
-                    borderColor: votes[poll._id] === option._id ? '#86efac' : '#d1d5db',
+                    backgroundColor: (votes[poll._id] || poll.votedOptionId) === option._id ? '#bbf7d0' : '#f3f4f6',
+                    borderColor: (votes[poll._id] || poll.votedOptionId) === option._id ? '#86efac' : '#d1d5db',
+
                     color: 'black',
                     textAlign: 'left',
                     marginBottom: 10,
@@ -75,7 +100,7 @@ export default function PollList() {
                     {option.text} — {option.votes} vote{option.votes !== 1 ? 's' : ''}
                   </span>
                 </Button>
-              ))}
+              ))} */}
             </div>
           </div>
         </Card>

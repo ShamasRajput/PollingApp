@@ -134,7 +134,7 @@ exports.voteOnPoll = async (req, res) => {
         option.votes = (currentVotes + 1).toString();
 
         // Track voter IP
-        poll.voters.push({ ip });
+        poll.voters.push({ ip, optionId });
 
         await poll.save();
 

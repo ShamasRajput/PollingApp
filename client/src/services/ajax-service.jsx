@@ -104,20 +104,6 @@ class AjaxService {
 
                     if (contentType.includes('application/json')) {
                         return response.json();
-                    } else if (contentType.includes('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')) {
-                        // Handle Excel file download
-                        const blob = await response.blob();
-                        const fileName = response.headers.get('Content-Disposition')?.match(/filename="(.+)"/)?.[1] || 'download.xlsx';
-
-                        // Trigger download
-                        const link = document.createElement('a');
-                        link.href = window.URL.createObjectURL(blob);
-                        link.download = fileName;
-                        document.body.appendChild(link);
-                        link.click();
-                        document.body.removeChild(link);
-
-                        return { success: true, message: 'File downloaded successfully' };
                     } else {
                         // Handle other content types if necessary
                         return response.blob();
