@@ -49,7 +49,7 @@ export default function LoginForm({ onLogin }) {
       </Form.Item>
 
       <Form.Item>
-        <Button type="primary" htmlType="submit" block>
+        <Button type="primary" htmlType="submit" block loading={loading}>
           Login
         </Button>
       </Form.Item>
