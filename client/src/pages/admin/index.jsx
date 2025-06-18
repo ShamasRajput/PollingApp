@@ -1,89 +1,143 @@
-// pages/Dashboard.js
-import { useState } from 'react';
-import { Card, Button, Modal, Form, Input, List, Space, Popconfirm, message } from 'antd';
+import { useEffect, useState } from 'react';
+import { Card, Button, Modal, Form, Input, List, Space, Popconfirm, message, Upload, Image } from 'antd';
+import { pollService } from '../../services';
 
 export default function Dashboard() {
   const [polls, setPolls] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editPoll, setEditPoll] = useState(null);
-
   const [form] = Form.useForm();
 
-  const handleCreateOrUpdate = (values) => {
-    if (editPoll) {
-      // Update existing poll
-      setPolls(prev =>
-        prev.map(p => (p.id === editPoll.id ? { ...p, ...values } : p))
-      );
-      message.success('Poll updated successfully');
-    } else {
-      // Create new poll
-      const newPoll = {
-        id: Date.now(),
-        ...values,
-        options: values.options.split(',').map(opt => opt.trim())
-      };
-      setPolls(prev => [...prev, newPoll]);
-      message.success('Poll created successfully');
+  const fetchPolls = async () => {
+    const response = await pollService.fetch();
+    if (response?.success) {
+      setPolls(response.data);
     }
-    form.resetFields();
-    setEditPoll(null);
-    setIsModalOpen(false);
+  };
+
+  useEffect(() => {
+    fetchPolls();
+  }, []);
+
+  const handleCreateOrUpdate = async (values) => {
+    try {
+      const formData = new FormData();
+
+      formData.append("name", values.question);
+
+      const options = values.options
+        .split(',')
+        .map(opt => opt.trim());
+
+      formData.append("options", JSON.stringify(options));
+
+      if (values.image && values.image.file) {
+        formData.append("image", values.image.fileList[0].originFileObj);
+      }
+
+      let response;
+
+      if (editPoll) {
+        response = await pollService.update(editPoll._id, formData);
+        message.success("Poll updated successfully");
+      } else {
+        response = await pollService.add(formData);
+        message.success("Poll created successfully");
+      }
+
+      if (response?.success) {
+        fetchPolls();
+        setIsModalOpen(false);
+        form.resetFields();
+        setEditPoll(null);
+      }
+    } catch (err) {
+      console.error(err);
+      message.error("Something went wrong");
+    }
   };
 
   const handleEdit = (poll) => {
     setEditPoll(poll);
     form.setFieldsValue({
-      question: poll.question,
-      options: poll.options.join(', ')
+      question: poll.name,
+      options: poll.options.map(o => o.text).join(', ')
     });
     setIsModalOpen(true);
   };
 
-  const handleDelete = (id) => {
-    setPolls(prev => prev.filter(p => p.id !== id));
-    message.success('Poll deleted');
+  const handleDelete = async (id) => {
+    const res = await pollService.delete(id);
+    if (res?.success) {
+      message.success("Poll deleted successfully");
+      fetchPolls();
+    }
   };
 
   return (
     <div className="p-6 bg-gray-100 min-h-screen">
       <div className="max-w-3xl mx-auto">
         <h1 className="text-2xl font-bold mb-4">Polls Dashboard</h1>
-        <Button type="primary" onClick={() => { setIsModalOpen(true); setEditPoll(null); form.resetFields(); }}>
+        <Button type="primary" onClick={() => {
+          setIsModalOpen(true);
+          setEditPoll(null);
+          form.resetFields();
+        }}>
           Create New Poll
         </Button>
 
         <List
           itemLayout="vertical"
-          className="mt-6"
+          style={{ marginTop: 6 }}
           dataSource={polls}
           renderItem={(poll) => (
             <Card
-              key={poll.id}
-              title={poll.question}
-              className="mb-4"
+              key={poll._id}
+              title={poll.name}
+              style={{ marginBottom: 6 }}
               extra={
                 <Space>
                   <Button size="small" onClick={() => handleEdit(poll)}>Edit</Button>
-                  <Popconfirm title="Delete this poll?" onConfirm={() => handleDelete(poll.id)}>
+                  <Popconfirm title="Delete this poll?" onConfirm={() => handleDelete(poll._id)}>
                     <Button size="small" danger>Delete</Button>
                   </Popconfirm>
                 </Space>
               }
             >
-              <ul className="list-disc pl-6">
-                {poll.options.map((opt, idx) => (
-                  <li key={idx}>{opt}</li>
-                ))}
-              </ul>
+              <div className="flex gap-4">
+                {poll.image && (
+                  <div className="flex-shrink-0 w-18 h-18 overflow-hidden rounded border border-gray-200">
+                    <Image
+                      src={poll.image}
+                      alt="Poll"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                )}
+
+                <div className="flex-grow">
+                  <ul className="list-disc pl-4">
+                    {poll.options.map((opt, idx) => (
+                      <li key={idx}>
+                        {opt.text} — {opt.votes} vote{opt.votes !== 1 ? 's' : ''}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
             </Card>
+
           )}
         />
 
         <Modal
           title={editPoll ? "Edit Poll" : "Create Poll"}
           open={isModalOpen}
-          onCancel={() => { setIsModalOpen(false); setEditPoll(null); }}
+          onCancel={() => {
+            setIsModalOpen(false);
+            setEditPoll(null);
+            form.resetFields();
+          }}
           onOk={() => form.submit()}
           okText={editPoll ? "Update" : "Create"}
         >
@@ -92,7 +146,15 @@ export default function Dashboard() {
               <Input placeholder="Enter poll question" />
             </Form.Item>
             <Form.Item name="options" label="Options (comma separated)" rules={[{ required: true }]}>
-              <Input placeholder="e.g. Option A, Option B, Option C" />
+              <Input placeholder="e.g. Apple, Banana, Mango" />
+            </Form.Item>
+            <Form.Item name="image" label="Upload Image">
+              <Upload
+                beforeUpload={() => false}
+                maxCount={1}
+              >
+                <Button>Select Image</Button>
+              </Upload>
             </Form.Item>
           </Form>
         </Modal>

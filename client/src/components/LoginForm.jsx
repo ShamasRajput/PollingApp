@@ -1,4 +1,4 @@
-import { Form, Input, Button } from 'antd';
+import { Form, Input, Button, notification } from 'antd';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom'
 import { ROLES } from '../constants';
@@ -14,12 +14,19 @@ export default function LoginForm({ onLogin }) {
     setLoading(true)
     const response = await AuthService.loginPost(values)
     setLoading(false)
+    console.log(response?.success ?? false)
     if (response?.success ?? false) {
       onLogin();
       localStorage.setItem('token', response.data.token)
       localStorage.setItem('role', ROLES.ADMIN)
       navigate('/dashboard');
+    } else {
+      notification.error({ message: "error" })
     }
+  };
+
+  const goToSignup = () => {
+    navigate('/signup');
   };
 
   return (
@@ -51,6 +58,12 @@ export default function LoginForm({ onLogin }) {
       <Form.Item>
         <Button type="primary" htmlType="submit" block loading={loading}>
           Login
+        </Button>
+      </Form.Item>
+
+      <Form.Item style={{ marginBottom: 0 }}>
+        <Button type="link" block onClick={goToSignup}>
+          Don't have an account? Sign up
         </Button>
       </Form.Item>
     </Form>

@@ -23,7 +23,7 @@ exports.createPoll = async (req, res) => {
             name,
             options,
             image,
-            user: req.user.userId, 
+            user: req.user.userId,
         });
 
         res.status(201).json({ success: true, data: formatPoll(poll, req) });
@@ -42,12 +42,11 @@ exports.getMyPolls = async (req, res) => {
     }
 };
 
-
-
 exports.getPolls = async (req, res) => {
     try {
         const polls = await Poll.find();
-        res.json({ success: true, data: polls });
+        const formattedPolls = polls.map(p => formatPoll(p, req));
+        res.json({ success: true, data: formattedPolls });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
     }
@@ -65,20 +64,34 @@ exports.getPoll = async (req, res) => {
 
 exports.updatePoll = async (req, res) => {
     try {
-        const { name, options } = req.body;
+        const { name } = req.body;
+
+        const options = Array.isArray(req.body.options)
+            ? req.body.options.map(opt => ({ text: opt }))
+            : JSON.parse(req.body.options).map(opt => ({ text: opt }));
+
         const image = req.file ? req.file.path : undefined;
 
         const updatedPoll = await Poll.findByIdAndUpdate(
             req.params.id,
-            { name, options, ...(image && { image }) },
+            {
+                name,
+                options,
+                ...(image && { image }),
+            },
             { new: true }
         );
+
+        if (!updatedPoll) {
+            return res.status(404).json({ success: false, message: "Poll not found" });
+        }
 
         res.json({ success: true, data: formatPoll(updatedPoll, req) });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
     }
 };
+
 
 exports.deletePoll = async (req, res) => {
     try {

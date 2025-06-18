@@ -7,6 +7,7 @@ import Login from "../pages/Login";
 import MainLayout from "../layout";
 import AuthLayout from "../layout/AuthLayout"
 import Dashboard from "../pages/admin";
+import Signup from "../pages/SignUp";
 
 export default function Navigation() {
 
@@ -35,9 +36,9 @@ export default function Navigation() {
         return "NotFound";
     };
 
-    // useEffect(() => {
-    //     setUserRole(localStorage.getItem("role"));
-    // }, [loginKey]);
+    useEffect(() => {
+        setUserRole(localStorage.getItem("role"));
+    }, [loginKey]);
 
 
     return (
@@ -45,6 +46,7 @@ export default function Navigation() {
             <Routes>
                 <Route path="/" element={Wrapper(MainLayout, null, handleComponent(null, Home))} />
                 <Route path="/login" element={<AuthLayout><Login onLogin={handleLogin} /></AuthLayout>} />
+                <Route path="/signup" element={<AuthLayout><Signup /></AuthLayout>} />
 
                 <Route path="/dashboard" element={Wrapper(MainLayout, ROLES.ADMIN, <Dashboard />)} />
 

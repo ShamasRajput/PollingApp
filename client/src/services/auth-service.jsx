@@ -3,15 +3,9 @@ import { validationErrors } from "../utils";
 import ajaxService from "./ajax-service";
 
 class AuthService {
-    async loginPost(email, password, remember) {
-        const data = {
-            email: email,
-            password: password,
-            remember: remember,
-            grant_type: 'password'
-        };
+    async loginPost(data) {
 
-        const uri = `${API_URL}/auth/login`;  
+        const uri = `${API_URL}/auth/login`;
         const headers = {
             'Content-Type': 'application/json'
         };
@@ -37,7 +31,7 @@ class AuthService {
             console.error("Error fetching data:", error);
             return { error: "Network error" };
         }
-       
+
     }
 
     async signUpPost(data) {
